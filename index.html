@@ -6,13 +6,11 @@
 <title>Дом ароматов — каталог</title>
 <link href="https://fonts.googleapis.com/css2?family=Marcellus&family=Jost:wght@300;400;500&display=swap" rel="stylesheet">
 <style>
-:root{--bg:#ecebf1;--ink:#1c1b29;--soft:#5d5b70;--line:#cfcddb;--panel:#f7f6fa;
+:root{color-scheme:light;--bg:#ffffff;--ink:#1c1b29;--soft:#5d5b70;--line:#d8e3ec;--panel:rgba(255,255,255,.72);
 box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
-@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:#15141d;--ink:#ecebf3;--soft:#a3a1b8;--line:#2c2a3b;--panel:#1d1c28}}
-:root[data-theme="dark"]{--bg:#15141d;--ink:#ecebf3;--soft:#a3a1b8;--line:#2c2a3b;--panel:#1d1c28}
 html{scroll-padding-top:env(safe-area-inset-top,0px)}
 *{box-sizing:border-box}
-body{margin:0;background:var(--bg);color:var(--ink);font:400 17px/1.65 Jost,"Helvetica Neue",Arial,sans-serif}
+body{margin:0;min-height:100vh;background:linear-gradient(120deg,#c9edff 0%,#f4fbff 28%,#ffffff 50%,#fffbe0 72%,#ffe978 100%) 0 0/220% 220%;animation:shimmer 18s ease-in-out infinite alternate;color:var(--ink);font:400 17px/1.65 Jost,"Helvetica Neue",Arial,sans-serif}
 header{max-width:1040px;margin:0 auto;padding:72px 24px 24px}
 h1{font:400 clamp(38px,7vw,68px)/1.05 Marcellus,Georgia,serif;margin:0 0 18px;letter-spacing:.01em}
 header p{max-width:52ch;color:var(--soft);margin:0}
@@ -21,7 +19,11 @@ header p{max-width:52ch;color:var(--soft);margin:0}
 .filters button[aria-pressed="true"]{background:var(--ink);color:var(--bg);border-color:var(--ink)}
 button:focus-visible{outline:2px solid var(--ink);outline-offset:3px}
 main{max-width:1040px;margin:0 auto;padding:36px 24px 80px;display:grid;gap:40px}
-.card{display:grid;grid-template-columns:1.05fr 1fr;gap:0;background:var(--panel);border:1px solid var(--line);border-radius:6px;overflow:hidden}
+@keyframes shimmer{from{background-position:0% 15%}to{background-position:100% 85%}}
+.card{position:relative;display:grid;grid-template-columns:1.05fr 1fr;gap:0;background:var(--panel);-webkit-backdrop-filter:blur(8px);backdrop-filter:blur(8px);border:1px solid var(--line);border-radius:6px;overflow:hidden;transform:perspective(1100px) rotateX(0deg) rotateY(0deg) translateY(0);transition:transform .6s cubic-bezier(.2,.7,.2,1),box-shadow .4s;box-shadow:0 10px 30px -22px rgba(30,60,90,.3)}
+.card::after{content:"";position:absolute;inset:0;pointer-events:none;opacity:0;transition:opacity .3s;background:radial-gradient(420px circle at var(--mx,50%) var(--my,50%),rgba(255,255,255,.4),transparent 60%)}
+.card.on{transition:transform .12s ease-out,box-shadow .3s;transform:perspective(1100px) rotateX(var(--rx,0deg)) rotateY(var(--ry,0deg)) translateY(-6px);box-shadow:0 30px 55px -24px rgba(30,70,110,.45)}
+.card.on::after{opacity:1}
 .card[hidden]{display:none}
 .gal{position:relative}
 .stage{position:relative;height:100%;min-height:440px;overflow:hidden;background:linear-gradient(160deg,var(--b),var(--a));transition:background .5s}
@@ -46,7 +48,7 @@ dl div{display:grid;grid-template-columns:84px 1fr;gap:12px;padding:10px 0;borde
 dt{color:var(--soft)}dd{margin:0}
 .meta{font-size:15px;color:var(--soft)}
 @media (max-width:760px){.card{grid-template-columns:1fr}.stage{min-height:360px}.txt{padding:28px 22px}}
-@media (prefers-reduced-motion:reduce){*{transition:none!important}}
+@media (prefers-reduced-motion:reduce){*{transition:none!important;animation:none!important}}
 </style>
 </head>
 <body>
@@ -68,6 +70,7 @@ var P=[
 {n:"Кабинет",t:"Вечером",a:"#4a1f2b",b:"#8a4a3c",c:"#e2b987",f:"Спокойная власть: вам не нужно повышать голос.",s:"Кожа, табак и тёплое дерево. Запах хорошей библиотеки и решений, которые приняты окончательно.",top:"кардамон, бергамот",mid:"кожа, табак",base:"сандал, амбра",v:"50 мл"}
 ];
 var list=document.getElementById("list");
+var calm=matchMedia("(prefers-reduced-motion:reduce)").matches;
 P.forEach(function(p){
 var el=document.createElement("article");el.className="card";el.dataset.t=p.t;
 el.style.setProperty("--a",p.a);el.style.setProperty("--b",p.b);el.style.setProperty("--c",p.c);
@@ -78,6 +81,8 @@ var st=el.querySelector(".stage"),th=el.querySelector(".thumbs");
 var b=document.createElement("button");b.setAttribute("aria-label",l);b.setAttribute("aria-pressed",i==0);
 b.onclick=function(){st.dataset.f=i;[].forEach.call(th.children,function(x,j){x.setAttribute("aria-pressed",j==i)})};
 th.appendChild(b)});
+el.addEventListener("pointermove",function(e){if(calm||e.pointerType==="touch")return;var r=el.getBoundingClientRect(),x=(e.clientX-r.left)/r.width,y=(e.clientY-r.top)/r.height;el.classList.add("on");el.style.setProperty("--ry",((x-.5)*7).toFixed(2)+"deg");el.style.setProperty("--rx",((.5-y)*5).toFixed(2)+"deg");el.style.setProperty("--mx",(x*100).toFixed(1)+"%");el.style.setProperty("--my",(y*100).toFixed(1)+"%")});
+el.addEventListener("pointerleave",function(){el.classList.remove("on");el.style.setProperty("--rx","0deg");el.style.setProperty("--ry","0deg")});
 list.appendChild(el)});
 document.getElementById("filters").onclick=function(e){
 var t=e.target.dataset.t;if(!t)return;
